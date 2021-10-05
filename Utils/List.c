@@ -22,7 +22,6 @@ void ListDeInit(List *list) {
     while (list->front) {
         node = list->front;
         list->front = list->front->next;
-        free(node->data);
         free(node);
     }
 }
@@ -46,8 +45,7 @@ void ListPush(List *list, void *data, unsigned int size, int index) {
     node->next = NULL;
     node->index = index;
     node->size = size;
-    node->data = malloc(size);
-    memcpy(node->data, data, size);
+    node->data = data;
 
     if (IsListEmpty(list)) {
         list->front = node;
@@ -78,7 +76,7 @@ void *ListPop(List *list, int index) {
 
         if (node == NULL) {
             printf("%s: can't find index %d\n", __FUNCTION__, index);
-            break;
+            return NULL;
         }
     } while (1);
 
@@ -102,7 +100,6 @@ void ListDelete(List *list, int index) {
             list->rear = NULL;
         }
 
-        free(node->data);
         free(node);
         node = NULL;
         --list->size;
@@ -125,13 +122,11 @@ void ListDelete(List *list, int index) {
             if (node == list->rear) {
                 //尾指针指向上一个元素
                 list->rear = node_last;
-                free(node->data);
                 free(node);
                 node = NULL;
                 --list->size;
             } else {
                 node_last->next = node->next;
-                free(node->data);
                 free(node);
                 node = NULL;
                 --list->size;

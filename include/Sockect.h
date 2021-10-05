@@ -11,8 +11,4 @@ int StartSockectServer(int port);
 
 void StopSockectServer();
 
-int StartSockectClient(int port);
-
-void StopSocketClient();
-
 #endif //FILECOPYSERVER_SOCKECT_H
