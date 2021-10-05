@@ -9,8 +9,6 @@
 #include "stdbool.h"
 #include "stdlib.h"
 
-typedef void (*QueueDataCB)(void *data, size_t size);
-
 typedef struct QueueNode {
     void *data;
     unsigned int size;
@@ -27,10 +25,10 @@ void QueueInit(Queue *queue);
 
 void QueueDeInit(Queue *queue);
 
-void QueuePush(Queue *queue, void *data, size_t size);
+bool IsQueueEmpty(Queue *queue);
+
+void QueuePush(Queue *queue, void *data, unsigned int size);
 
 QueueNode *QueuePop(Queue *queue);
-
-bool IsQueueEmpty(Queue *queue);
 
 #endif //FILECOPYSERVER_QUEUE_H

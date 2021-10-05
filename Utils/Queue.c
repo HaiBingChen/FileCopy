@@ -20,17 +20,24 @@ void QueueInit(Queue *queue) {
 
 void QueueDeInit(Queue *queue) {
     assert(queue != NULL);
-    QueueNode *tmp = NULL;
+    QueueNode *node = NULL;
     while (queue->front) {
-        tmp = queue->front;
+        node = queue->front;
         queue->front = queue->front->next;
-        free(tmp->data);
-        free(tmp);
+        free(node->data);
+        free(node);
     }
 }
 
-void QueuePush(Queue *queue, void *data, size_t size) {
+bool IsQueueEmpty(Queue *queue) {
     assert(queue != NULL);
+
+    return (queue->size == 0);
+}
+
+void QueuePush(Queue *queue, void *data, unsigned int size) {
+    assert(queue != NULL);
+    assert(data != NULL);
 
     if (queue->size > cMaxQueueSize) {
         printf("[ERROR] %s: queue is overflow\n", __FUNCTION__);
@@ -38,6 +45,7 @@ void QueuePush(Queue *queue, void *data, size_t size) {
     }
 
     QueueNode *node = (QueueNode *) malloc(sizeof(QueueNode));
+    node->next = NULL;
     node->size = size;
     node->data = malloc(size);
     memcpy(node->data, data, size);
@@ -58,24 +66,17 @@ QueueNode *QueuePop(Queue *queue) {
 
     if (IsQueueEmpty(queue)) {
         printf("[ERROR] %s: queue is empty\n", __FUNCTION__);
+        return NULL;
     }
 
     struct QueueNode *node = queue->front;
-    if(node == queue->rear)
-    {
+    if (node == queue->rear) {
         queue->rear = NULL;
         queue->front = NULL;
-    }
-    else if(node != NULL){
+    } else if (node != NULL) {
         queue->front = node->next;
     }
     --queue->size;
 
     return node;
-}
-
-bool IsQueueEmpty(Queue *queue) {
-    assert(queue != NULL);
-
-    return (queue->size == 0);
 }

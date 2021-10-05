@@ -25,16 +25,15 @@ int opt = SO_REUSEADDR;
 pthread_t sockect_server_tid;
 int sockect_server_shutdown = 1;
 
-void *SockectClientThread(void *arg) {
+void *SockectClientDataRevThread(void *arg) {
     if (!arg) {
         printf("Invalid input arguments in %s()\n", __FUNCTION__);
         pthread_exit(NULL);
     }
 
-    int client_fd = *((int *) arg);
-    free(arg);
+    int client_fd = (int ) arg;
 
-    printf("Child client %d thread start to commuicate with socket client...\n", client_fd);
+    printf("%s: client fd %d...\n", __FUNCTION__ , client_fd);
 
     unsigned char *rev_buffer = (unsigned char *) malloc(max_buffer_size);
 
@@ -60,6 +59,14 @@ void *SockectClientThread(void *arg) {
     return NULL;
 }
 
+void *SockectClientDataHandleThread(void *arg) {
+    int client_fd = (int ) arg;
+
+    printf("%s: client fd %d...\n", __FUNCTION__ , client_fd);
+
+    //when SockectClientDataRevThread quit, here should quit
+}
+
 void *SockectServerThread(void *arg) {
     printf("Start accept new client incoming...\n");
 
@@ -68,20 +75,17 @@ void *SockectServerThread(void *arg) {
     socklen_t len;
 
     while (!sockect_server_shutdown) {
-        int *sockect_client_fd = malloc(sizeof(int));
-
-        *sockect_client_fd = accept(server_fd, (struct sockaddr *) &sockect_client, &len);
-        if (*sockect_client_fd < 0) {
+        int sockect_client_fd = accept(server_fd, (struct sockaddr *) &sockect_client, &len);
+        if (sockect_client_fd < 0) {
             printf("[ERROR] Accept new client failure: %s\n", strerror(errno));
-            free(sockect_client_fd);
-            sockect_client_fd = NULL;
             continue;
         }
 
         printf("Accept new client[%s:%d] successfully\n",
                inet_ntoa(sockect_client.sin_addr), ntohs(sockect_client.sin_port));
 
-        ThreadPoolAddTask(SockectClientThread, (void *) sockect_client_fd);
+        ThreadPoolAddTask(SockectClientDataRevThread, (void *) sockect_client_fd);
+        ThreadPoolAddTask(SockectClientDataHandleThread, (void *) sockect_client_fd);
     }
 
     close(server_fd);
@@ -117,7 +121,7 @@ int StartSockectServer(int port) {
     sockect_server_shutdown = 0;
 
     //start thread pool
-    ThreadPoolInit(max_sockect_size);
+    ThreadPoolInit(max_sockect_size*2);
 
     pthread_create(&sockect_server_tid, NULL, SockectServerThread, (void *) &sockect_server_fd);
 
