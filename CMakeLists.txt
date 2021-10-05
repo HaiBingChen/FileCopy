@@ -19,7 +19,7 @@ aux_source_directory(${CMAKE_CURRENT_SOURCE_DIR}/ EXE_SOURCE_FILES)
 
 add_executable(${EXE_BIN_NAME} ${EXE_SOURCE_FILES})
 
-target_link_libraries(${EXE_BIN_NAME} FileCopyUtils)
+target_link_libraries(${EXE_BIN_NAME} FileCopyUtils pthread)
 
 #Build libFileCopyUtils
 set(FileCopy_LIB_VERSION "0.0.1")

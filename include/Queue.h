@@ -9,25 +9,39 @@
 #include "stdbool.h"
 #include "stdlib.h"
 
-typedef struct FileData {
-    unsigned char data;
-} FileData;
+typedef enum DataType {
+    DataTypeChar = 0,
+    DataTypeUChar,
+    DataTypeShort,
+    DataTypeUShort,
+    DataTypeInt,
+    DataTypeUInt,
+    DataTypeLong,
+    DataTypeULong,
+    DataTypeFloat,
+    DataTypeDouble,
+    DataTypeStruct,
+} DataType;
 
-typedef struct FileNode {
-    FileData data;
-    struct FileNode *next;
-} FileNode;
+typedef void (*QueueDataCB)(void * data, size_t size, DataType type);
 
-typedef struct FileQueue {
-    FileNode *rear;
-    FileNode *front;
+typedef struct QueueNode {
+    void *data;
     unsigned int size;
-} FileQueue;
+    DataType type;
+    struct QueueNode *next;
+} QueueNode;
 
-void QueueInit(FileQueue *queue);
-void QueueDeInit(FileQueue *queue);
-void QueuePush(FileQueue *queue, FileData *data);
-struct FileData QueuePop(FileQueue *queue);
-bool IsEmpty(FileQueue *node);
+typedef struct Queue {
+    QueueNode *rear;
+    QueueNode *front;
+    unsigned int size;
+} Queue;
+
+void QueueInit(Queue *queue);
+void QueueDeInit(Queue *queue);
+void QueuePush(Queue *queue, void *data, size_t size, DataType type);
+void QueuePop(Queue *queue, QueueDataCB cb);
+bool IsQueueEmpty(Queue *queue);
 
 #endif //FILECOPYSERVER_QUEUE_H

@@ -10,7 +10,7 @@
 
 const unsigned int cMaxQueueSize = 30;
 
-void QueueInit(FileQueue *queue)
+void QueueInit(Queue *queue)
 {
     assert(queue != NULL);
 
@@ -19,30 +19,34 @@ void QueueInit(FileQueue *queue)
     queue->size = 0;
 }
 
-void QueueDeInit(FileQueue *queue)
+void QueueDeInit(Queue *queue)
 {
     assert(queue != NULL);
-    FileNode *tmp = NULL;
+    QueueNode *tmp = NULL;
     while(queue->front) {
         tmp = queue->front;
         queue->front = queue->front->next;
+        free(tmp->data);
         free(tmp);
     }
 }
 
-void QueuePush(FileQueue *queue, FileData *data)
+void QueuePush(Queue *queue, void *data, size_t size, DataType type)
 {
     assert(queue != NULL);
 
     if(queue->size > cMaxQueueSize) {
-        printf("[ERROR]QueuePush: queue is overflow\n");
+        printf("[ERROR] %s: queue is overflow\n", __FUNCTION__);
         return;
     }
 
-    FileNode *node =  (FileNode *)malloc(sizeof(FileNode));
-    memcpy(&node->data, data, sizeof(FileData));
+    QueueNode *node =  (QueueNode *)malloc(sizeof(QueueNode));
+    node->size = size;
+    node->type = type;
+    node->data = malloc(size);
+    memcpy(node->data, data, size);
 
-    if(IsEmpty(queue)) {
+    if(IsQueueEmpty(queue)) {
         queue->front = node;
         queue->rear = node;
     } else {
@@ -53,29 +57,25 @@ void QueuePush(FileQueue *queue, FileData *data)
     ++queue->size;
 }
 
-struct FileData QueuePop(FileQueue *queue)
+void QueuePop(Queue *queue, QueueDataCB cb)
 {
     assert(queue != NULL);
 
-    FileData data;
-
-    if(IsEmpty(queue)) {
-        printf("[ERROR]QueuePop: queue is empty\n");
-        data.data = -1;
-        return data;
+    if(IsQueueEmpty(queue)) {
+        printf("[ERROR] %s: queue is empty\n", __FUNCTION__);
     }
 
-    struct FileNode *tmp = queue->front;
-
-    data = queue->front->data;
+    struct QueueNode *tmp = queue->front;
     queue->front = queue->front->next;
+
+    cb(tmp->data, tmp->size, tmp->type);
+
+    free(tmp->data);
     free(tmp);
     --queue->size;
-
-    return data;
 }
 
-bool IsEmpty(FileQueue *queue)
+bool IsQueueEmpty(Queue *queue)
 {
     assert(queue != NULL);
 
