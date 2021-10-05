@@ -9,26 +9,11 @@
 #include "stdbool.h"
 #include "stdlib.h"
 
-typedef enum DataType {
-    DataTypeChar = 0,
-    DataTypeUChar,
-    DataTypeShort,
-    DataTypeUShort,
-    DataTypeInt,
-    DataTypeUInt,
-    DataTypeLong,
-    DataTypeULong,
-    DataTypeFloat,
-    DataTypeDouble,
-    DataTypeStruct,
-} DataType;
-
-typedef void (*QueueDataCB)(void * data, size_t size, DataType type);
+typedef void (*QueueDataCB)(void *data, size_t size);
 
 typedef struct QueueNode {
     void *data;
     unsigned int size;
-    DataType type;
     struct QueueNode *next;
 } QueueNode;
 
@@ -39,9 +24,13 @@ typedef struct Queue {
 } Queue;
 
 void QueueInit(Queue *queue);
+
 void QueueDeInit(Queue *queue);
-void QueuePush(Queue *queue, void *data, size_t size, DataType type);
-void QueuePop(Queue *queue, QueueDataCB cb);
+
+void QueuePush(Queue *queue, void *data, size_t size);
+
+QueueNode *QueuePop(Queue *queue);
+
 bool IsQueueEmpty(Queue *queue);
 
 #endif //FILECOPYSERVER_QUEUE_H

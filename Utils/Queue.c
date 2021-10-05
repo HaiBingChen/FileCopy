@@ -10,8 +10,7 @@
 
 const unsigned int cMaxQueueSize = 30;
 
-void QueueInit(Queue *queue)
-{
+void QueueInit(Queue *queue) {
     assert(queue != NULL);
 
     queue->front = NULL;
@@ -19,11 +18,10 @@ void QueueInit(Queue *queue)
     queue->size = 0;
 }
 
-void QueueDeInit(Queue *queue)
-{
+void QueueDeInit(Queue *queue) {
     assert(queue != NULL);
     QueueNode *tmp = NULL;
-    while(queue->front) {
+    while (queue->front) {
         tmp = queue->front;
         queue->front = queue->front->next;
         free(tmp->data);
@@ -31,22 +29,20 @@ void QueueDeInit(Queue *queue)
     }
 }
 
-void QueuePush(Queue *queue, void *data, size_t size, DataType type)
-{
+void QueuePush(Queue *queue, void *data, size_t size) {
     assert(queue != NULL);
 
-    if(queue->size > cMaxQueueSize) {
+    if (queue->size > cMaxQueueSize) {
         printf("[ERROR] %s: queue is overflow\n", __FUNCTION__);
         return;
     }
 
-    QueueNode *node =  (QueueNode *)malloc(sizeof(QueueNode));
+    QueueNode *node = (QueueNode *) malloc(sizeof(QueueNode));
     node->size = size;
-    node->type = type;
     node->data = malloc(size);
     memcpy(node->data, data, size);
 
-    if(IsQueueEmpty(queue)) {
+    if (IsQueueEmpty(queue)) {
         queue->front = node;
         queue->rear = node;
     } else {
@@ -57,26 +53,28 @@ void QueuePush(Queue *queue, void *data, size_t size, DataType type)
     ++queue->size;
 }
 
-void QueuePop(Queue *queue, QueueDataCB cb)
-{
+QueueNode *QueuePop(Queue *queue) {
     assert(queue != NULL);
 
-    if(IsQueueEmpty(queue)) {
+    if (IsQueueEmpty(queue)) {
         printf("[ERROR] %s: queue is empty\n", __FUNCTION__);
     }
 
-    struct QueueNode *tmp = queue->front;
-    queue->front = queue->front->next;
-
-    cb(tmp->data, tmp->size, tmp->type);
-
-    free(tmp->data);
-    free(tmp);
+    struct QueueNode *node = queue->front;
+    if(node == queue->rear)
+    {
+        queue->rear = NULL;
+        queue->front = NULL;
+    }
+    else if(node != NULL){
+        queue->front = node->next;
+    }
     --queue->size;
+
+    return node;
 }
 
-bool IsQueueEmpty(Queue *queue)
-{
+bool IsQueueEmpty(Queue *queue) {
     assert(queue != NULL);
 
     return (queue->size == 0);
