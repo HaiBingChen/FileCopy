@@ -5,34 +5,29 @@
 #include <unistd.h>
 #include "stdio.h"
 #include "Sockect.h"
-#include "string.h"
-#include <netinet/in.h>
 
-int port = 1234;
+void PayloadDataCallBack(int fd, unsigned char *data, unsigned int len)
+{
+    printf("[PayloadDataCallBack] fd:%d\n", fd);
+    for(int i=0; i<len; i++){
+        printf("0x%x,", data[i]);
+    }
+    printf("\n");
+}
 
 int main(int argc, const char **argv) {
+
     printf("File Copy Client start\n");
-    int sockect_client_fd = -1;
-    struct sockaddr_in sockect_client;
-    if ((sockect_client_fd = socket(AF_INET, SOCK_STREAM, 0)) == -1) {
-        printf("[ERROR] %s: Creating socket failed\n", __FUNCTION__);
-        return -1;
-    }
 
-    memset(&sockect_client, 0, sizeof(sockect_client));
-    sockect_client.sin_family = AF_INET;
-    sockect_client.sin_port = htons(port);
-    sockect_client.sin_addr.s_addr = htonl(INADDR_ANY);
+    registerPayLoadDataCB(PayloadDataCallBack);
 
-    if(connect(sockect_client_fd, (struct sockaddr *)(&sockect_client), sizeof(struct sockaddr)) == -1) {
-        printf("[ERROR] %s: connect socket failed\n", __FUNCTION__);
-        return -2;
-    }
+    int socket_fd = StartSockectClient(1234);
 
-    char sendbuf[1024];
-    while(1) {
-        fgets(sendbuf, sizeof(sendbuf), stdin);
-        send(sockect_client_fd, sendbuf, strlen(sendbuf), 0);
+    unsigned char buff[3] = {0x01,0x02,0x03};
+    SocketSendData(socket_fd, buff, 3);
+
+    while (1) {
+        pause();
     }
 
     return 0;

@@ -7,8 +7,16 @@
 
 #include<sys/socket.h>
 
-int StartSockectServer(int port);
+typedef void (*PayLoadDataCB)(int fd, unsigned char *data, unsigned int len);
 
+int StartSockectServer(int port);
 void StopSockectServer();
+
+int StartSockectClient(int port);
+void StopSockectClient();
+
+void registerPayLoadDataCB(PayLoadDataCB cb);
+void SocketSendData(int sockect_fd, unsigned char *data, unsigned int len);
+void ProcessPayloadData(int fd, unsigned char *data, unsigned int len);
 
 #endif //FILECOPYSERVER_SOCKECT_H
